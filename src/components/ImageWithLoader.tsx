@@ -4,12 +4,11 @@ interface ImageWithLoaderProps extends React.ImgHTMLAttributes<HTMLImageElement>
     src: string
     alt: string
     className?: string
-    width?: number
-    height?: number
+    imageClassName?: string
     priority?: boolean
 }
 
-export function ImageWithLoader({ src, alt, className = '', priority = false, ...props }: ImageWithLoaderProps) {
+export function ImageWithLoader({ src, alt, className = '', imageClassName = '', priority = false, ...props }: ImageWithLoaderProps) {
     const [isLoading, setIsLoading] = useState(true)
     const [currentSrc, setCurrentSrc] = useState<string | null>(null)
 
@@ -24,7 +23,7 @@ export function ImageWithLoader({ src, alt, className = '', priority = false, ..
     }, [src])
 
     return (
-        <div className={`relative overflow-hidden ${className}`}>
+        <div className={`relative ${className}`}>
             {/* Loading Placeholder / Skeleton */}
             {isLoading && (
                 <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center z-10">
@@ -36,7 +35,7 @@ export function ImageWithLoader({ src, alt, className = '', priority = false, ..
                 src={currentSrc || src} // Fallback to src if currentSrc isn't set yet (though opacity handles visibility)
                 alt={alt}
                 loading={priority ? 'eager' : 'lazy'}
-                className={`${className} transition-opacity duration-500 ease-in-out ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                className={`transition-opacity duration-500 ease-in-out ${isLoading ? 'opacity-0' : 'opacity-100'} ${imageClassName}`}
                 {...props}
             />
         </div>

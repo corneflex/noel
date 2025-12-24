@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
   const [imageMap, setImageMap] = useState<Map<string, string>>(new Map())
+  const [backgroundUrl, setBackgroundUrl] = useState<string>('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,8 +33,40 @@ function App() {
   useEffect(() => {
     if (user) {
       loadCharacters()
+      loadAppSettings()
     }
   }, [user])
+
+  const loadAppSettings = async () => {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'background_image')
+      .single()
+
+    if (data && !error) {
+      // Temporarily store the raw value, we'll resolve it once we have the imageMap
+      // Actually, let's just use the raw value if we don't have the map yet, 
+      // but valid logic is to wait or update when imageMap updates.
+      // For simplicity, we'll store it in a ref or just rely on the effect below.
+      setBackgroundUrl(data.value)
+    }
+  }
+
+  // Effect to resolve background URL against imageMap
+  const [resolvedBackground, setResolvedBackground] = useState<string>('')
+  useEffect(() => {
+    if (backgroundUrl && imageMap.size > 0) {
+      if (imageMap.has(backgroundUrl)) {
+        setResolvedBackground(imageMap.get(backgroundUrl)!)
+      } else {
+        setResolvedBackground(backgroundUrl)
+      }
+    } else if (backgroundUrl && backgroundUrl.startsWith('http')) {
+      setResolvedBackground(backgroundUrl)
+    }
+  }, [backgroundUrl, imageMap])
+
 
   const loadCharacters = async () => {
     setLoading(true)
@@ -122,7 +155,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[url('https://www.transparenttextures.com/patterns/comic-dots.png')] bg-comic-blue text-comic-black font-reading selection:bg-comic-yellow selection:text-comic-black">
+    <div
+      className="min-h-screen flex flex-col bg-comic-blue text-comic-black font-reading selection:bg-comic-yellow selection:text-comic-black bg-cover bg-center bg-no-repeat transition-all duration-1000"
+      style={{
+        backgroundImage: resolvedBackground ? `url('${resolvedBackground}')` : `url('https://www.transparenttextures.com/patterns/comic-dots.png')`
+      }}
+    >
       {/* Header */}
       <header className="p-6 flex justify-between items-center border-b-4 border-black bg-comic-yellow sticky top-0 z-50 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] -skew-y-1 my-4 mx-2">
         <h1

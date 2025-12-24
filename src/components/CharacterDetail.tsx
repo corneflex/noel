@@ -114,25 +114,28 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
                         onClick={prevGalleryMedia}
                         className="absolute left-4 top-1/2 -translate-y-1/2 text-white font-comic text-6xl hover:text-comic-yellow drop-shadow-lg z-50"
                     >
-                        ❯
+                        ❮
                     </button>
 
-                    <div className="w-full h-full max-w-7xl max-h-[90vh] p-4 flex items-center justify-center">
-                        {actionGalleryMedia[currentGalleryIndex].type === 'video' ? (
-                            <video
-                                src={actionGalleryMedia[currentGalleryIndex].url}
-                                controls
-                                autoPlay
-                                className="max-w-full max-h-full border-4 border-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                            />
-                        ) : (
-                            <ImageWithLoader
-                                src={actionGalleryMedia[currentGalleryIndex].url}
-                                alt="Action Gallery"
-                                className="max-w-full max-h-full object-contain border-4 border-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                                priority={currentGalleryIndex === 0}
-                            />
-                        )}
+                    <div className="absolute inset-0 p-4 flex items-center justify-center pointer-events-none">
+                        <div className="relative w-full h-full flex items-center justify-center pointer-events-auto">
+                            {actionGalleryMedia[currentGalleryIndex].type === 'video' ? (
+                                <video
+                                    src={actionGalleryMedia[currentGalleryIndex].url}
+                                    controls
+                                    autoPlay
+                                    className="max-w-full max-h-full border-4 border-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                                />
+                            ) : (
+                                <ImageWithLoader
+                                    src={actionGalleryMedia[currentGalleryIndex].url}
+                                    alt="Action Gallery"
+                                    className="w-full h-full flex items-center justify-center"
+                                    imageClassName="max-w-full max-h-full object-contain border-4 border-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                                    priority={currentGalleryIndex === 0}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     <button
@@ -172,14 +175,16 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
                             <ImageWithLoader
                                 src={slideshowImages[currentSlide]}
                                 alt={character.name}
-                                className="w-full h-full object-cover contrast-125 transition-opacity duration-300"
+                                className="w-full h-full"
+                                imageClassName="w-full h-full object-cover contrast-125 transition-opacity duration-300"
                                 priority={true}
                             />
                         ) : (
                             <ImageWithLoader
                                 src={character.image_url}
                                 alt={character.name}
-                                className="w-full h-full object-cover contrast-125"
+                                className="w-full h-full"
+                                imageClassName="w-full h-full object-cover contrast-125"
                                 priority={true}
                             />
                         )}
