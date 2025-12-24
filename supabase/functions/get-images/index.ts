@@ -97,25 +97,62 @@ Deno.serve(async (req) => {
     // Générer les URLs signées pour chaque image/vidéo
     const imagesWithUrls: ImageListItem[] = await Promise.all(
       imageFiles.map(async (file) => {
+        // 1. Original URL
         const { data: signedUrlData, error: urlError } = await supabase.storage
           .from(BUCKET_NAME)
           .createSignedUrl(file.name, SIGNED_URL_EXPIRY)
+
+        const type = getMediaType(file.name)
+
+        let thumbUrlData: { signedUrl: string } | null = null;
+        let thumbError: Error | null = null;
+
+        // Only attempt transform for images
+        if (type === 'image') {
+          // 2. Thumbnail URL (resized)
+          // Transform options: width 500, quality 80, format webp for performance
+          const { data, error } = await supabase.storage
+            .from(BUCKET_NAME)
+            .createSignedUrl(file.name, SIGNED_URL_EXPIRY, {
+              transform: {
+                width: 500,
+                quality: 80,
+                format: 'origin', // Keep original format or force webp? 'origin' is safer for videos/unknowns but 'webp' is smaller.
+                // Actually, transform only works on images. Supabase usually ignores it for non-images or handles it.
+                // For videos, createSignedUrl with transform might fail or just ignored.
+                // Let's safe guard: only apply transform if type is image.
+              }
+            })
+          thumbUrlData = data;
+          thumbError = error;
+        }
+
+        // Use original URL as fallback for thumbnail if transform fails or it's a video
+        // (Supabase video thumbnail generation is not via createSignedUrl transform usually)
+        let thumbnailUrl = ''
+        if (type === 'image' && thumbUrlData?.signedUrl) {
+            thumbnailUrl = thumbUrlData.signedUrl
+        } else if (signedUrlData?.signedUrl) {
+            thumbnailUrl = signedUrlData.signedUrl
+        }
 
         if (urlError) {
           console.error(`Erreur URL pour ${file.name}:`, urlError)
           return {
             name: file.name,
             url: '',
+            thumbnailUrl: '',
             createdAt: file.created_at,
-            type: getMediaType(file.name)
+            type
           }
         }
 
         return {
           name: file.name,
-          url: signedUrlData.signedUrl,
+          url: signedUrlData?.signedUrl || '',
+          thumbnailUrl,
           createdAt: file.created_at,
-          type: getMediaType(file.name)
+          type
         }
       })
     )

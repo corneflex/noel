@@ -5,6 +5,7 @@ export interface Character {
   name: string
   description: string
   image_url: string
+  thumbnail_url?: string // Optional thumbnail for grid view
   image_filename?: string // Optional filename for private images
   stats: Record<string, number>
 }
@@ -23,6 +24,7 @@ export function CharacterCard({ character, onClick }: CharacterCardProps) {
       <div className="aspect-[2/3] w-full overflow-hidden border-b-4 border-black relative">
         <ImageWithLoader
           src={character.image_url}
+          thumbnailSrc={character.thumbnail_url}
           alt={character.name}
           className="h-full w-full"
           imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"

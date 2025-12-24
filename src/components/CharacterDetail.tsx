@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient'
 
 interface CharacterDetailProps {
     character: Character
-    imageMap?: Map<string, string>
+    imageMap?: Map<string, { full: string, thumb: string }>
     onBack: () => void
 }
 
@@ -38,7 +38,7 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
                     const category = row.category || 'profile'
 
                     if (imageMap.has(filename)) {
-                        const url = imageMap.get(filename)!
+                        const url = imageMap.get(filename)!.full
 
                         // Check file type
                         const isVideo = filename.toLowerCase().match(/\.(mp4|webm|mov)$/)

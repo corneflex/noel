@@ -12,7 +12,7 @@ function App() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
-  const [imageMap, setImageMap] = useState<Map<string, string>>(new Map())
+  const [imageMap, setImageMap] = useState<Map<string, { full: string, thumb: string }>>(new Map())
   const [backgroundUrl, setBackgroundUrl] = useState<string>('')
 
   useEffect(() => {
@@ -31,11 +31,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       loadCharacters()
       loadAppSettings()
     }
-  }, [user])
+  }, [user?.id])
 
   const loadAppSettings = async () => {
     const { data, error } = await supabase
@@ -58,7 +58,7 @@ function App() {
   useEffect(() => {
     if (backgroundUrl && imageMap.size > 0) {
       if (imageMap.has(backgroundUrl)) {
-        setResolvedBackground(imageMap.get(backgroundUrl)!)
+        setResolvedBackground(imageMap.get(backgroundUrl)!.full)
       } else {
         setResolvedBackground(backgroundUrl)
       }
@@ -83,7 +83,7 @@ function App() {
       return
     }
 
-    // 2. Fetch signed URLs from Edge Function
+    // 2. Fetch signed URLs from Edge Function (now returns thumbnailUrls too)
     try {
       const { data: imagesData, error: imagesError } = await supabase.functions.invoke('get-images')
 
@@ -92,11 +92,14 @@ function App() {
       }
 
       // Map images by filename for easy lookup
-      const newImageMap = new Map<string, string>()
+      const newImageMap = new Map<string, { full: string, thumb: string }>()
       if (imagesData && imagesData.images) {
         imagesData.images.forEach((img: any) => {
           if (img.name && img.url) {
-            newImageMap.set(img.name, img.url)
+            newImageMap.set(img.name, {
+              full: img.url,
+              thumb: img.thumbnailUrl || img.url
+            })
           }
         })
       }
@@ -107,13 +110,18 @@ function App() {
         // If character has an image_filename and we have a signed URL for it, use it
         // Otherwise fallback to the public image_url
         let finalImageUrl = char.image_url
+        let finalThumbnailUrl = char.image_url // Default to same URL
+
         if (char.image_filename && newImageMap.has(char.image_filename)) {
-          finalImageUrl = newImageMap.get(char.image_filename)
+          const mapped = newImageMap.get(char.image_filename)!
+          finalImageUrl = mapped.full
+          finalThumbnailUrl = mapped.thumb
         }
 
         return {
           ...char,
-          image_url: finalImageUrl
+          image_url: finalImageUrl,
+          thumbnail_url: finalThumbnailUrl
         }
       })
 
