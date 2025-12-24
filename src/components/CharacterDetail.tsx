@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Character } from './CharacterCard'
+import { ImageWithLoader } from './ImageWithLoader'
 import { supabase } from '../supabaseClient'
 
 interface CharacterDetailProps {
@@ -68,6 +69,26 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
         setCurrentSlide((prev) => (prev - 1 + slideshowImages.length) % slideshowImages.length)
     }
 
+    // Prefetching Logic
+    useEffect(() => {
+        if (slideshowImages.length > 0) {
+            const nextIndex = (currentSlide + 1) % slideshowImages.length
+            const img = new Image()
+            img.src = slideshowImages[nextIndex]
+        }
+    }, [currentSlide, slideshowImages])
+
+    useEffect(() => {
+        if (actionGalleryMedia.length > 0) {
+            const nextIndex = (currentGalleryIndex + 1) % actionGalleryMedia.length
+            const media = actionGalleryMedia[nextIndex]
+            if (media.type === 'image') {
+                const img = new Image()
+                img.src = media.url
+            }
+        }
+    }, [currentGalleryIndex, actionGalleryMedia])
+
     // Gallery Navigation
     const nextGalleryMedia = () => {
         setCurrentGalleryIndex((prev) => (prev + 1) % actionGalleryMedia.length)
@@ -105,10 +126,11 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
                                 className="max-w-full max-h-full border-4 border-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
                             />
                         ) : (
-                            <img
+                            <ImageWithLoader
                                 src={actionGalleryMedia[currentGalleryIndex].url}
                                 alt="Action Gallery"
                                 className="max-w-full max-h-full object-contain border-4 border-white shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                                priority={currentGalleryIndex === 0}
                             />
                         )}
                     </div>
@@ -147,16 +169,18 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
                     {/* Main Image Display */}
                     <div className="w-full h-full relative aspect-[2/3] md:aspect-auto">
                         {slideshowImages.length > 0 ? (
-                            <img
+                            <ImageWithLoader
                                 src={slideshowImages[currentSlide]}
                                 alt={character.name}
                                 className="w-full h-full object-cover contrast-125 transition-opacity duration-300"
+                                priority={true}
                             />
                         ) : (
-                            <img
+                            <ImageWithLoader
                                 src={character.image_url}
                                 alt={character.name}
                                 className="w-full h-full object-cover contrast-125"
+                                priority={true}
                             />
                         )}
 

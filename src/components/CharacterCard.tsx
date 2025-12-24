@@ -1,3 +1,5 @@
+import { ImageWithLoader } from './ImageWithLoader'
+
 export interface Character {
   id: string
   name: string
@@ -19,7 +21,7 @@ export function CharacterCard({ character, onClick }: CharacterCardProps) {
       className="group relative cursor-pointer overflow-hidden bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-200"
     >
       <div className="aspect-[2/3] w-full overflow-hidden border-b-4 border-black relative">
-        <img
+        <ImageWithLoader
           src={character.image_url}
           alt={character.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
