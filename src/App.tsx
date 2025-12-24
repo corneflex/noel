@@ -12,6 +12,7 @@ function App() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
+  const [imageMap, setImageMap] = useState<Map<string, string>>(new Map())
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -58,22 +59,23 @@ function App() {
       }
 
       // Map images by filename for easy lookup
-      const imageMap = new Map<string, string>()
+      const newImageMap = new Map<string, string>()
       if (imagesData && imagesData.images) {
         imagesData.images.forEach((img: any) => {
           if (img.name && img.url) {
-            imageMap.set(img.name, img.url)
+            newImageMap.set(img.name, img.url)
           }
         })
       }
+      setImageMap(newImageMap)
 
       // 3. Merge data
       const mergedCharacters = (charactersData || []).map((char: any) => {
         // If character has an image_filename and we have a signed URL for it, use it
         // Otherwise fallback to the public image_url
         let finalImageUrl = char.image_url
-        if (char.image_filename && imageMap.has(char.image_filename)) {
-          finalImageUrl = imageMap.get(char.image_filename)
+        if (char.image_filename && newImageMap.has(char.image_filename)) {
+          finalImageUrl = newImageMap.get(char.image_filename)
         }
 
         return {
@@ -156,6 +158,7 @@ function App() {
         ) : selectedCharacter ? (
           <CharacterDetail
             character={selectedCharacter}
+            imageMap={imageMap}
             onBack={() => setSelectedCharacter(null)}
           />
         ) : (
