@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { supabase } from './supabaseClient'
 import { Auth } from './Auth'
@@ -16,12 +16,38 @@ function App() {
   const [backgroundUrl, setBackgroundUrl] = useState<string>('')
   const { pathname } = useLocation()
   const mainRef = useRef<HTMLDivElement>(null)
+  const gridScrollRef = useRef(0)
 
-  useEffect(() => {
-    if (mainRef.current) {
-      mainRef.current.scrollTop = 0
+  // Disable browser's default scroll restoration
+  useLayoutEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
     }
-    window.scrollTo(0, 0)
+  }, [])
+
+  // Track window scroll position for the grid view
+  // We use useLayoutEffect to ensure the listener is added/removed synchronously
+  // with DOM updates, preventing stale scroll events from overwriting our ref
+  // when the page height changes during navigation.
+  useLayoutEffect(() => {
+    const handleScroll = () => {
+      if (pathname === '/') {
+        gridScrollRef.current = window.scrollY
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [pathname])
+
+  useLayoutEffect(() => {
+    if (pathname === '/') {
+      // Restore scroll for grid
+      window.scrollTo(0, gridScrollRef.current)
+    } else {
+      // Reset scroll for other pages
+      window.scrollTo(0, 0)
+    }
   }, [pathname])
 
   useEffect(() => {
