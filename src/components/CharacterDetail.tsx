@@ -174,14 +174,14 @@ export function CharacterDetail({ characters, imageMap }: CharacterDetailProps) 
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row h-full w-full max-w-7xl mx-auto overflow-hidden bg-white border-8 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] animate-in fade-in zoom-in duration-300 relative">
+            <div className="flex flex-col md:flex-row h-auto md:h-full w-full max-w-7xl mx-auto overflow-hidden md:overflow-hidden bg-white border-4 md:border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] animate-in fade-in zoom-in duration-300 relative">
                 {/* "TOP SECRET" Stamp */}
                 <div className="absolute top-2 right-2 md:top-4 md:right-4 z-20 border-2 md:border-4 border-red-600 text-red-600 px-2 py-1 md:px-4 md:py-2 font-black text-sm md:text-2xl uppercase opacity-80 -rotate-12 pointer-events-none">
                     Top Secret
                 </div>
 
                 {/* Left Column: Image & Slideshow */}
-                <div className="w-full md:w-1/2 relative border-b-8 md:border-b-0 md:border-r-8 border-black bg-black">
+                <div className="w-full md:w-1/2 relative border-b-4 md:border-b-0 md:border-r-8 border-black bg-black">
                     <div className="absolute top-4 left-4 z-10">
                         <button
                             onClick={onBack}
@@ -244,28 +244,28 @@ export function CharacterDetail({ characters, imageMap }: CharacterDetailProps) 
                 </div>
 
                 {/* Right Column: Stats & Info */}
-                <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-comic-yellow bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
-                    <h2 className="text-5xl md:text-7xl font-comic text-black mb-4 drop-shadow-[4px_4px_0px_rgba(255,255,255,1)] uppercase tracking-wider -skew-x-6">
+                <div className="w-full md:w-1/2 p-4 md:p-12 flex flex-col justify-center bg-comic-yellow bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
+                    <h2 className="text-4xl md:text-7xl font-comic text-black mb-4 drop-shadow-[4px_4px_0px_rgba(255,255,255,1)] uppercase tracking-wider -skew-x-6">
                         {character.name}
                     </h2>
 
-                    <div className="bg-white border-4 border-black p-6 mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform rotate-1">
+                    <div className="bg-white border-4 border-black p-4 md:p-6 mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform rotate-1">
                         <h3 className="text-xl font-comic text-comic-red mb-2 uppercase">Hero Bio:</h3>
-                        <p className="text-black font-reading text-xl leading-relaxed font-bold">
+                        <p className="text-black font-reading text-lg md:text-xl leading-relaxed font-bold">
                             {character.description}
                         </p>
                     </div>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 gap-4">
-                        <h3 className="text-3xl font-comic text-black uppercase mb-2">Power Levels</h3>
+                        <h3 className="text-2xl md:text-3xl font-comic text-black uppercase mb-2">Power Levels</h3>
                         {Object.entries(character.stats).map(([statName, statValue]) => (
                             <div
                                 key={statName}
-                                className="flex items-center gap-4"
+                                className="flex items-center gap-2 md:gap-4"
                             >
-                                <div className="w-32 text-right">
-                                    <span className="text-black font-comic text-xl uppercase tracking-wider bg-white px-2 border-2 border-black inline-block transform -skew-x-12">
+                                <div className="w-24 md:w-32 text-right">
+                                    <span className="text-black font-comic text-sm md:text-xl uppercase tracking-wider bg-white px-2 border-2 border-black inline-block transform -skew-x-12">
                                         {statName}
                                     </span>
                                 </div>
