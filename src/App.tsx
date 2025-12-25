@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { supabase } from './supabaseClient'
 import { Auth } from './Auth'
 import type { User } from '@supabase/supabase-js'
@@ -14,6 +14,15 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [imageMap, setImageMap] = useState<Map<string, { full: string, thumb: string }>>(new Map())
   const [backgroundUrl, setBackgroundUrl] = useState<string>('')
+  const { pathname } = useLocation()
+  const mainRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0
+    }
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -196,7 +205,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+      <main ref={mainRef} className="flex-1 p-4 md:p-8 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-4xl font-comic text-white animate-bounce drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
