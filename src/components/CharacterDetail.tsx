@@ -154,7 +154,7 @@ export function CharacterDetail({ character, imageMap, onBack }: CharacterDetail
 
             <div className="flex flex-col md:flex-row h-full w-full max-w-7xl mx-auto overflow-hidden bg-white border-8 border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] animate-in fade-in zoom-in duration-300 relative">
                 {/* "TOP SECRET" Stamp */}
-                <div className="absolute top-4 right-4 z-20 border-4 border-red-600 text-red-600 px-4 py-2 font-black text-2xl uppercase opacity-80 -rotate-12 pointer-events-none">
+                <div className="absolute top-2 right-2 md:top-4 md:right-4 z-20 border-2 md:border-4 border-red-600 text-red-600 px-2 py-1 md:px-4 md:py-2 font-black text-sm md:text-2xl uppercase opacity-80 -rotate-12 pointer-events-none">
                     Top Secret
                 </div>
 

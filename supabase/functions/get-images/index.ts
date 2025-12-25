@@ -75,10 +75,14 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Récupérer la liste des fichiers dans le bucket
+    // Récupérer la liste des fichiers dans le bucket (LIMIT INCREASED)
     const { data: files, error: listError } = await supabase.storage
       .from(BUCKET_NAME)
-      .list()
+      .list(undefined, {
+        limit: 1000,
+        offset: 0,
+        sortBy: { column: 'name', order: 'asc' },
+      })
 
     if (listError) {
       console.error('Erreur lors de la récupération des fichiers:', listError)
@@ -97,62 +101,55 @@ Deno.serve(async (req) => {
     // Générer les URLs signées pour chaque image/vidéo
     const imagesWithUrls: ImageListItem[] = await Promise.all(
       imageFiles.map(async (file) => {
-        // 1. Original URL
-        const { data: signedUrlData, error: urlError } = await supabase.storage
-          .from(BUCKET_NAME)
-          .createSignedUrl(file.name, SIGNED_URL_EXPIRY)
-
-        const type = getMediaType(file.name)
-
-        let thumbUrlData: { signedUrl: string } | null = null;
-        let thumbError: Error | null = null;
-
-        // Only attempt transform for images
-        if (type === 'image') {
-          // 2. Thumbnail URL (resized)
-          // Transform options: width 500, quality 80, format webp for performance
-          const { data, error } = await supabase.storage
+        try {
+          // 1. Original URL
+          const { data: signedUrlData, error: urlError } = await supabase.storage
             .from(BUCKET_NAME)
-            .createSignedUrl(file.name, SIGNED_URL_EXPIRY, {
-              transform: {
-                width: 500,
-                quality: 80,
-                format: 'origin', // Keep original format or force webp? 'origin' is safer for videos/unknowns but 'webp' is smaller.
-                // Actually, transform only works on images. Supabase usually ignores it for non-images or handles it.
-                // For videos, createSignedUrl with transform might fail or just ignored.
-                // Let's safe guard: only apply transform if type is image.
-              }
-            })
-          thumbUrlData = data;
-          thumbError = error;
-        }
+            .createSignedUrl(file.name, SIGNED_URL_EXPIRY)
 
-        // Use original URL as fallback for thumbnail if transform fails or it's a video
-        // (Supabase video thumbnail generation is not via createSignedUrl transform usually)
-        let thumbnailUrl = ''
-        if (type === 'image' && thumbUrlData?.signedUrl) {
-            thumbnailUrl = thumbUrlData.signedUrl
-        } else if (signedUrlData?.signedUrl) {
-            thumbnailUrl = signedUrlData.signedUrl
-        }
+          if (urlError) {
+            console.error(`Erreur URL pour ${file.name}:`, urlError)
+            return {
+              name: file.name,
+              url: '',
+              thumbnailUrl: '',
+              createdAt: file.created_at,
+              type: 'image' // Default to image on error to satisfy type
+            } as ImageListItem
+          }
 
-        if (urlError) {
-          console.error(`Erreur URL pour ${file.name}:`, urlError)
+          const type = getMediaType(file.name)
+
+          // 2. Thumbnail URL (Disabled Transform for Debugging/Stability)
+          // Previously we tried to transform, but it might be causing timeouts.
+          // For now, fall back to the original URL or a simple signed URL without transform.
+          
+          /* 
+          // TRANSFORM DISABLED TEMPORARILY
+          if (type === 'image') {
+             // ... transform logic ...
+          }
+          */
+
+          // Fallback: Use original URL for thumbnail
+          const thumbnailUrl = signedUrlData?.signedUrl || ''
+
           return {
             name: file.name,
-            url: '',
-            thumbnailUrl: '',
+            url: signedUrlData?.signedUrl || '',
+            thumbnailUrl,
             createdAt: file.created_at,
             type
           }
-        }
-
-        return {
-          name: file.name,
-          url: signedUrlData?.signedUrl || '',
-          thumbnailUrl,
-          createdAt: file.created_at,
-          type
+        } catch (innerError) {
+          console.error(`CRITICAL error processing file ${file.name}:`, innerError)
+           return {
+              name: file.name,
+              url: '',
+              thumbnailUrl: '',
+              createdAt: file.created_at,
+              type: 'image'
+            } as ImageListItem
         }
       })
     )

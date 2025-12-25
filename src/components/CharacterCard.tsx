@@ -27,7 +27,7 @@ export function CharacterCard({ character, onClick }: CharacterCardProps) {
           thumbnailSrc={character.thumbnail_url}
           alt={character.name}
           className="h-full w-full"
-          imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
+          imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 md:grayscale md:group-hover:grayscale-0"
         />
         {/* Comic Halftone Overlay */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/comic-dots.png')] opacity-20 pointer-events-none mix-blend-multiply" />
