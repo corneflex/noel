@@ -192,7 +192,10 @@ export function CharacterDetail({ characters, imageMap }: CharacterDetailProps) 
                     </div>
 
                     {/* Main Image Display */}
-                    <div className="w-full h-full relative aspect-[2/3] md:aspect-auto">
+                    <div
+                        className="w-full h-full relative aspect-[2/3] md:aspect-auto cursor-pointer"
+                        onClick={() => setIsGalleryOpen(true)}
+                    >
                         {slideshowImages.length > 0 ? (
                             <ImageWithLoader
                                 src={slideshowImages[currentSlide]}
