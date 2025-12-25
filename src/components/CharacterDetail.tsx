@@ -1,17 +1,39 @@
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import type { Character } from './CharacterCard'
 import { ImageWithLoader } from './ImageWithLoader'
 import { supabase } from '../supabaseClient'
 
 interface CharacterDetailProps {
-    character: Character
+    characters: Character[]
     imageMap?: Map<string, { full: string, thumb: string }>
-    onBack: () => void
 }
 
-export function CharacterDetail({ character, imageMap, onBack }: CharacterDetailProps) {
+export function CharacterDetail({ characters, imageMap }: CharacterDetailProps) {
+    const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
+
+    // Find character from the list passed down
+    const character = characters.find(c => c.id === id)
+
     const [slideshowImages, setSlideshowImages] = useState<string[]>([])
     const [currentSlide, setCurrentSlide] = useState(0)
+
+    if (!character) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-white">
+                <h2 className="text-4xl font-comic mb-4">Hero Not Found!</h2>
+                <button
+                    onClick={() => navigate('/')}
+                    className="px-6 py-2 bg-comic-red text-white font-comic text-xl border-4 border-black"
+                >
+                    Return to HQ
+                </button>
+            </div>
+        )
+    }
+
+    const onBack = () => navigate('/')
 
     // Action Gallery State
     const [actionGalleryMedia, setActionGalleryMedia] = useState<{ url: string, type: 'image' | 'video' }[]>([])

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { Routes, Route, Link } from 'react-router-dom'
 import { supabase } from './supabaseClient'
 import { Auth } from './Auth'
 import type { User } from '@supabase/supabase-js'
@@ -9,7 +10,6 @@ import type { Character } from './components/CharacterCard'
 function App() {
   const [user, setUser] = useState<User | null>(null)
   const [characters, setCharacters] = useState<Character[]>([])
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
   const [imageMap, setImageMap] = useState<Map<string, { full: string, thumb: string }>>(new Map())
@@ -52,33 +52,6 @@ function App() {
       setBackgroundUrl(data.value)
     }
   }
-
-  // Scroll Management
-  const mainRef = useRef<HTMLElement>(null)
-  const savedScrollTop = useRef(0)
-
-  const handleSelectCharacter = (char: Character | null) => {
-    if (char) {
-      // Saving scroll position before switching to detail
-      if (mainRef.current) {
-        savedScrollTop.current = mainRef.current.scrollTop
-      }
-    }
-    setSelectedCharacter(char)
-  }
-
-  // Restore scroll when returning to grid, or scroll to top when entering detail
-  useLayoutEffect(() => {
-    if (mainRef.current) {
-      if (selectedCharacter) {
-        // Enter Detail: Scroll to top
-        mainRef.current.scrollTop = 0
-      } else {
-        // Return to Grid: Restore scroll
-        mainRef.current.scrollTop = savedScrollTop.current
-      }
-    }
-  }, [selectedCharacter])
 
   // Effect to resolve background URL against imageMap
   const [resolvedBackground, setResolvedBackground] = useState<string>('')
@@ -177,6 +150,8 @@ function App() {
     }
   }
 
+  // ... (keep data loading logic)
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -198,12 +173,12 @@ function App() {
     >
       {/* Header */}
       <header className="p-6 flex justify-between items-center border-b-4 border-black bg-comic-yellow sticky top-0 z-50 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] -skew-y-1 my-4 mx-2">
-        <h1
+        <Link
+          to="/"
           className="text-4xl font-comic tracking-wider text-black uppercase cursor-pointer hover:scale-105 transition-transform drop-shadow-[2px_2px_0px_rgba(255,255,255,1)]"
-          onClick={() => handleSelectCharacter(null)}
         >
           Hero Select
-        </h1>
+        </Link>
         <div className="flex gap-4">
           <button
             onClick={toggleFullScreen}
@@ -221,24 +196,24 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main ref={mainRef} className="flex-1 p-4 md:p-8 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-4xl font-comic text-white animate-bounce drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
               Loading Heroes...
             </div>
           </div>
-        ) : selectedCharacter ? (
-          <CharacterDetail
-            character={selectedCharacter}
-            imageMap={imageMap}
-            onBack={() => handleSelectCharacter(null)}
-          />
         ) : (
-          <CharacterGrid
-            characters={characters}
-            onSelectCharacter={handleSelectCharacter}
-          />
+          <Routes>
+            <Route
+              path="/"
+              element={<CharacterGrid characters={characters} />}
+            />
+            <Route
+              path="/character/:id"
+              element={<CharacterDetail characters={characters} imageMap={imageMap} />}
+            />
+          </Routes>
         )}
       </main>
     </div>

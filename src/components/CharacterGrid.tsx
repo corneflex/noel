@@ -3,10 +3,9 @@ import type { Character } from './CharacterCard'
 
 interface CharacterGridProps {
     characters: Character[]
-    onSelectCharacter: (character: Character) => void
 }
 
-export function CharacterGrid({ characters, onSelectCharacter }: CharacterGridProps) {
+export function CharacterGrid({ characters }: CharacterGridProps) {
     // Check if there are no characters
     if (characters.length === 0) {
         return (
@@ -20,11 +19,10 @@ export function CharacterGrid({ characters, onSelectCharacter }: CharacterGridPr
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 p-6">
-            {characters.map((character) => (
+            {characters.map((char) => (
                 <CharacterCard
-                    key={character.id}
-                    character={character}
-                    onClick={onSelectCharacter}
+                    key={char.id}
+                    character={char}
                 />
             ))}
         </div>

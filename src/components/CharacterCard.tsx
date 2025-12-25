@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { ImageWithLoader } from './ImageWithLoader'
 
 export interface Character {
@@ -12,14 +13,13 @@ export interface Character {
 
 interface CharacterCardProps {
   character: Character
-  onClick: (character: Character) => void
 }
 
-export function CharacterCard({ character, onClick }: CharacterCardProps) {
+export function CharacterCard({ character }: CharacterCardProps) {
   return (
-    <div
-      onClick={() => onClick(character)}
-      className="group relative cursor-pointer overflow-hidden bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-200"
+    <Link
+      to={`/character/${character.id}`}
+      className="group relative cursor-pointer overflow-hidden bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-200 block"
     >
       <div className="aspect-[2/3] w-full overflow-hidden border-b-4 border-black relative">
         <ImageWithLoader
@@ -44,6 +44,6 @@ export function CharacterCard({ character, onClick }: CharacterCardProps) {
           {character.description}
         </p>
       </div>
-    </div>
+    </Link>
   )
 }
